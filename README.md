@@ -3,6 +3,12 @@
   Fast divide-and-conquer Cox proportional hazards model with adaptive lasso, developed by Yan Wang \<yaw719@mail.harvard.edu\>, Tianxi Cai \<tcai@hsph.harvard.edu\>, and Chuan Hong \<Chuan_Hong@hms.harvard.edu\>
 
   The dcalasso package reduces the computational burden of fitting large adaptive lasso for Cox model when n>>p, by divide and conquer, least square approximation, and one-step estimation.
+  
+  The package can fit both adaptive lasso for time-independent Cox proportional hazards model and adaptive lasso for time-dependent Cox proportional hazards model.
+  
+  To compute an adaptive lasso estimate, the function first finds the estimate for the corresponding unpenalized Cox proportional hazards model and then shrinks it to be the adaptive lasso-penalized estimator.
+  
+  The key novelties are two folds: (1) a divide-and-conquer strategy is applied for the computation of the initial unpenalized Cox proportional hazards model by splitting the observations into <tt>K</tt> chunks and processing each separately; (2) a fast linearization is applied in the estimation of the shrinkage step further reducing the computational burden.
 
 # Citation
 
