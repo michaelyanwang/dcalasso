@@ -1,0 +1,14 @@
+Package: dcalasso
+Type: Package
+Title: Divide-and-conquer adaptive lasso for big data
+Version: 0.1.0
+Author: Yan Wang <yaw719@mail.harvard.edu>, 
+	Tianxi Cai <tcai@hsph.harvard.edu>, 
+	Chuan Hong <Chuan_Hong@hms.harvard.edu>
+Maintainer: Yan Wang <yaw719@mail.harvard.edu>
+Description: divideconquer package reduces the computational burden of fitting large adaptive lasso for Cox model when n>>p, by divide and conquer, least square approximation, and one-step estimation.
+License:
+Depends: survival, mgcv, glmnet, doParallel, foreach, MASS
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.1
