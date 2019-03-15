@@ -1,6 +1,6 @@
 # Description
 
-  Fast divide-and-conquer Cox proportional hazards model with adaptive lasso, developed by Yan Wang \<yaw719@mail.harvard.edu\>, Tianxi Cai \<tcai@hsph.harvard.edu\>, and Chuan Hong \<Chuan_Hong@hms.harvard.edu\>
+  Fast divide-and-conquer Cox proportional hazards model with adaptive lasso, developed by [Yan Wang](https://www.researchgate.net/profile/Yan_Wang374) \<yaw719@mail.harvard.edu\>, [Tianxi Cai](https://www.hsph.harvard.edu/tianxi-cai/), and [Chuan Hong](https://dbmi.hms.harvard.edu/person/postdoctoral-fellows/chuan-hong)
 
   The dcalasso package reduces the computational burden of fitting large adaptive lasso for Cox model when n>>p, by divide and conquer, least square approximation, and one-step estimation.
   
