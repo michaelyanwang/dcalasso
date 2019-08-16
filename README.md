@@ -1,6 +1,15 @@
-# Description
+# Descriptions
 
   Fast divide-and-conquer Cox proportional hazards model with adaptive lasso, developed by [Yan Wang](https://www.researchgate.net/profile/Yan_Wang374) \<yaw719@mail.harvard.edu\>, [Tianxi Cai](https://www.hsph.harvard.edu/tianxi-cai/), and [Chuan Hong](https://dbmi.hms.harvard.edu/person/postdoctoral-fellows/chuan-hong)
+  
+  The package answers the following questions:
+  
+  I want to fit a Cox proportional hazards model. But my dataset is too large to load to RAM. What should I do?
+  I want to fit a Cox proportional hazards model. But my dataset is too large to save as one piece. What should I do?
+  I want to do variable selection in Cox model. But my dataset is too large to make the computation feasible, too large to load to RAM, too large to save as one piece for Cox model variable selection method. What should I do?
+  ....
+  
+  Essentially - what should I do when my data for Cox model w/ or w/o variable selection are too large?
 
   The dcalasso package aims to fit extremely large Cox model with and without variable selection via adaptive LASSO, when both n and p are extremely large and n>>p, even if the data cannot be loaded or saved as a whole. The method first finds a divide-and-conquer Cox model estimate without adaptive LASSO penalty by applying the divide-and-conquer strategy with one-step estimation to the data that are divided into subsets. Then it finds the divide-and-conquer adaptive LASSO estimate based on the divide-and-conquer Cox estimate, using least square approximation. This method not only speeds up the computation when the dataset is extremely large, but also makes the computation feasible when the data is impossible to save or load as a whole. In the paper above, we show that the divide-and-conquer adaptive LASSO estimator has variable selection consistency and asymptotic normality property as the standard adaptive lasso estimator.
   
