@@ -1,6 +1,10 @@
 # Descriptions
 
-  Fast divide-and-conquer Cox proportional hazards model with adaptive lasso, developed by [Yan Wang](https://www.researchgate.net/profile/Yan_Wang374) \<yaw719@mail.harvard.edu\>, [Tianxi Cai](https://www.hsph.harvard.edu/tianxi-cai/), and [Chuan Hong](https://dbmi.hms.harvard.edu/person/postdoctoral-fellows/chuan-hong)
+  Fast divide-and-conquer Cox proportional hazards model with adaptive lasso
+  
+  The software was developed by [Yan Wang](https://www.researchgate.net/profile/Yan_Wang374) \<yaw719@mail.harvard.edu\>, [Tianxi Cai](https://www.hsph.harvard.edu/tianxi-cai/), and [Chuan Hong](https://dbmi.hms.harvard.edu/person/postdoctoral-fellows/chuan-hong)
+  
+  The method development have inputs from all authors in the paper (https://arxiv.org/pdf/1804.00735.pdf).
   
   The package answers the following questions:
   
