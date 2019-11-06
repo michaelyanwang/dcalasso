@@ -1,6 +1,6 @@
-# Name
+# Package name
 
-  Fast divide-and-conquer Cox proportional hazards model with adaptive lasso
+  dcalasso: Fast divide-and-conquer Cox proportional hazards model with adaptive lasso
   
 # Questions that the package addresses
 
