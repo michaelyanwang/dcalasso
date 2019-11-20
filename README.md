@@ -45,7 +45,7 @@ The [method](https://academic.oup.com/biostatistics/advance-article-abstract/doi
 
 ```
 require(devtools)
-install_github("celehs/dcalasso")
+install_github("michaelyanwang/dcalasso")
 require(dcalasso)
 ```
 # Key function
