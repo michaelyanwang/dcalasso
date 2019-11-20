@@ -45,7 +45,7 @@ The [method](https://academic.oup.com/biostatistics/advance-article-abstract/doi
 
 ```
 require(devtools)
-install_github("michaelyanwang/dcalasso")
+install_github("celehs/dcalasso")
 require(dcalasso)
 ```
 # Key function
@@ -66,7 +66,7 @@ dcalasso(formula, family=cox.ph(), data = NULL, data.rds = NULL, weights, subset
 
 # Key examples
 
-1. Fitting a Cox model for a time-independent dataset with 50 variables and 100,000 samples. 
+1. Time-independent dataset: Fitting a Cox model for a time-independent dataset with 50 variables and 100,000 samples. 
 
 ```
 # Data simulation
@@ -90,7 +90,7 @@ plot(modp)
   The print statement provides coefficients for both unpenalized estimate and adaptive LASSO estimate. The plot statement provides the relationship between the penalization factor <tt>lambda</tt> and model's Bayesian information criteria (BIC), which was the metric built in the package for variable selection.
 
 
-2. Fitting a Cox model for a dataset with 50 time-independent variables, 50 time-dependent variables, and 100,000 samples. 
+2. Time-dependent dataset: Fitting a Cox model for a dataset with 50 time-dependent variables, 50 additional time-independent variables, and 100,000 samples. 
 
 ```
 # Data simulation
@@ -118,8 +118,10 @@ plot(modp)
 # Other examples
 See <tt>?dcalasso</tt>
 
+1. Time-independent dataset, when the dataset can be saved and loaded as a whole: Fitting a Cox model for a time-independent dataset with 50 variables and 100,000 samples (detailed version of Key Example 1).
+
 ```
-##### Time-independent #####
+##### Generating a time-independent dataset #####
 set.seed(1)
 N = 1e5; p.x = 50; K = 100; n = N/K;  cor = 0.2;
 bb = c(rep(0.4,4),rep(0.2,4),rep(0.1,4),rep(0.05,4))
@@ -127,19 +129,22 @@ beta0 = c(1, bb, rep(0, p.x - length(bb)))
 dat.mat0 = as.data.frame(SIM.FUN(N, p.x = p.x, cor = cor, family='Cox',beta0 = beta0))
 dat.mat0[,'strat'] = rep(1:20, each = N/20)
 
-## Without strata
-# unicore
+## A Cox model, without stratification of baseline hazard: Surv(u,delta)~V3+V4+.....+V52
+# Example option 1: Using 1 core for computation, dividing the dataset to 10 chunks, using 2 iterations of one-step estimator for update
 mod = dcalasso(as.formula(paste0('Surv(u,delta)~',paste(paste0('V',3:52),collapse='+'))),
                family = 'cox.ph',data = dat.mat0,
                K = 10, iter.os = 2)
 sum.mod = summary(mod)
 print(sum.mod, unpen = T)
 plot(mod)
+
+# Performing model prediction
 pred.link = predict(mod, newdata = dat.mat0)
 pred.term = predict(mod, newdata = dat.mat0, type = 'terms')
 pred.response = predict(mod, newdata = dat.mat0, type = 'response')
 
-# parallel
+
+# Example option 2: Same model as above: Using 2 cores for parallel computation, dividing the dataset to 10 chunks, using 4 iterations of one-step estimator for update
 modp = dcalasso(as.formula(paste0('Surv(u,delta)~',paste(paste0('V',3:52),collapse='+'))),
                 family = 'cox.ph',data = dat.mat0,
                 K = 10, iter.os = 4, ncores = 2)
@@ -147,7 +152,7 @@ sum.modp = summary(modp)
 print(sum.modp, unpen = T)
 plot(modp)
 
-# Standard
+# Compare the divide and conquer method unpenalized model fit against a standard Cox fit using the whole dataset
 std = coxph(as.formula(paste0('Surv(u,delta)~',paste(paste0('V',3:52),collapse='+'))),
             data = dat.mat0)
 
@@ -155,8 +160,8 @@ plot(mod$coefficients.unpen, std$coefficients)
 plot(modp$coefficients.unpen, std$coefficients)
 
 
-## With strata
-# unicore
+## A Cox model, with stratification of baseline hazard by "strat": Surv(u,delta)~strata(strat)+V3+V4+.....+V52
+# Example option 1: Using 1 core for computation, dividing the dataset to 10 chunks, using 2 iterations of one-step estimator for update
 mod = dcalasso(as.formula(paste0('Surv(u,delta)~strata(strat)+',paste(paste0('V',3:52),collapse='+'))),
                family = 'cox.ph',data = dat.mat0,
                K = 10, iter.os = 2)
@@ -164,7 +169,7 @@ sum.mod = summary(mod)
 print(sum.mod, unpen = T)
 plot(mod)
 
-# parallel
+# Example option 2: Same model as above: Using 2 cores for parallel computation, dividing the dataset to 10 chunks, using 4 iterations of one-step estimator for update
 modp = dcalasso(as.formula(paste0('Surv(u,delta)~strata(strat)+',paste(paste0('V',3:52),collapse='+'))),
                 family = 'cox.ph',data = dat.mat0,
                 K = 10, iter.os = 2, ncores = 2)
@@ -172,18 +177,18 @@ sum.modp = summary(modp)
 print(sum.modp, unpen = T)
 plot(modp)
 
-# Standard
+# Compare the divide and conquer method unpenalized model fit against a standard Cox fit using the whole dataset
 std = coxph(as.formula(paste0('Surv(u,delta)~strata(strat)+',paste(paste0('V',3:52),collapse='+'))),
             data = dat.mat0)
 
 
 plot(mod$coefficients.unpen, std$coefficients)
 plot(modp$coefficients.unpen, std$coefficients)
+```
 
-
-
-
-##### Time-independent with separate file saving #####
+2. Time-independent dataset, when the dataset are saved in multiple files: Fitting a Cox model for a time-independent dataset with 50 variables and 100,000 samples.
+```
+##### Generating a time-independent dataset, saving the data into 10 separate files #####
 set.seed(1)
 N = 1e5; p.x = 50; K = 100; n = N/K;  cor = 0.2;
 bb = c(rep(0.4,4),rep(0.2,4),rep(0.1,4),rep(0.05,4))
@@ -197,8 +202,8 @@ for (kk in 1: 10){
   saveRDS(df, file = paste0(dir,'dataTI',kk,'.rds'))
 }
 
-## Without strata
-# unicore
+## A Cox model, without stratification of baseline hazard: Surv(u,delta)~V3+V4+.....+V52
+# Example option 1: Using 1 core for computation, data.rds specifies that the data are saved into 10 files [each time the RAM will only contain data from 1 file], using 2 iterations of one-step estimator for update
 mod = dcalasso(as.formula(paste0('Surv(u,delta)~',paste(paste0('V',3:52),collapse='+'))),
                family = 'cox.ph',
                data.rds = paste0(dir,'dataTI',1:10,'.rds'), iter.os = 2)
@@ -206,7 +211,7 @@ sum.mod = summary(mod)
 print(sum.mod, unpen = T)
 plot(mod)
 
-# parallel
+# Example option 2: Using 2 core for parallel computation, data.rds specifies that the data are saved into 10 files [each time the RAM will only contain data from 1 file], using 2 iterations of one-step estimator for update
 modp = dcalasso(as.formula(paste0('Surv(u,delta)~',paste(paste0('V',3:52),collapse='+'))),
                 family = 'cox.ph',
                 data.rds = paste0(dir,'dataTI',1:10,'.rds'), iter.os = 2, ncores = 2)
@@ -214,7 +219,7 @@ sum.modp = summary(modp)
 print(sum.modp, unpen = T)
 plot(modp)
 
-# Standard
+# Compare the divide and conquer method unpenalized model fit against a standard Cox fit using the whole dataset
 std = coxph(as.formula(paste0('Surv(u,delta)~',paste(paste0('V',3:52),collapse='+'))),
             data = dat.mat0)
 
@@ -222,32 +227,35 @@ plot(mod$coefficients.unpen, std$coefficients)
 plot(modp$coefficients.unpen, std$coefficients)
 
 
-## With strata
-# unicore
+## A Cox model, with stratification of baseline hazard by "strat": Surv(u,delta)~strata(strat)+V3+V4+.....+V52
+# Example option 1: Using 1 core for computation, loading data from 10 separate files (imply K=10) [each time the RAM will only contain data from 1 file], using 2 iterations of one-step estimator for update
 mod = dcalasso(as.formula(paste0('Surv(u,delta)~strata(strat)+',paste(paste0('V',3:52),collapse='+'))),
                family = 'cox.ph',
-               data.rds = paste0(dir,'dataTI',1:10,'.rds'), K = 10, iter.os = 2)
+               data.rds = paste0(dir,'dataTI',1:10,'.rds'), iter.os = 2)
 sum.mod = summary(mod)
 print(sum.mod, unpen = T)
 plot(mod)
 
-# parallel
+# Example option 2: Using 2 core for parallel computation, data.rds specifies that the data are saved into 10 files [each time the RAM will only contain data from 1 file], using 2 iterations of one-step estimator for update
 modp = dcalasso(as.formula(paste0('Surv(u,delta)~strata(strat)+',paste(paste0('V',3:52),collapse='+'))),
                 family = 'cox.ph',
-                data.rds = paste0(dir,'dataTI',1:10,'.rds'), K = 10, iter.os = 2, ncores = 2)
+                data.rds = paste0(dir,'dataTI',1:10,'.rds'), iter.os = 2, ncores = 2)
 sum.modp = summary(modp)
 print(sum.modp, unpen = T)
 plot(modp)
 
-# Standard
+# Compare the divide and conquer method unpenalized model fit against a standard Cox fit using the whole dataset
 std = coxph(as.formula(paste0('Surv(u,delta)~strata(strat)+',paste(paste0('V',3:52),collapse='+'))),
             data = dat.mat0)
 
 plot(mod$coefficients.unpen, std$coefficients)
 plot(modp$coefficients.unpen, std$coefficients)
+```
 
+3. Time-dependent dataset, when the dataset can be saved and loaded as a whole: Fitting a Cox model for a dataset with 50 time-dependent variables, 50 additional time-independent variables, and 100,000 samples (detailed version of Key Example 2).
 
-########### Time-dependent loading as a whole ####################
+```
+########### Generating a time-dependent dataset ####################
 set.seed(1)
 n.subject = 1e5; p.ti = 50; p.tv = 50; K = 20; n = n.subject/K; cor = 0.2;  lambda.grid = 10^seq(-10,3,0.01);
 beta0.ti = NULL
@@ -256,8 +264,8 @@ dat.mat0 = as.data.frame(SIM.FUN.TVC(p.ti, p.tv, n.subject, cor, beta0.ti, beta0
 dat.mat0[,'strat'] = dat.mat0[,dim(dat.mat0)[2]]%%(n.subject/20)
 dat.mat0 = dat.mat0[,-(dim(dat.mat0)[2]-1)]
 
-## Without strata
-# unicore
+## A time-dependent Cox model, without stratification of baseline hazard: Surv(t0,t1,status)~V4+V5+...+V103
+# Example option 1: Using 1 core for computation, dividing the data into 10 chunks, using 2 iterations of one-step estimator for update
 mod = dcalasso(as.formula(paste0('Surv(t0,t1,status)~',paste(paste0('V',4:103),collapse='+'))),
                family = 'cox.ph',data = dat.mat0,
                K = 10, iter.os = 2)
@@ -265,7 +273,7 @@ sum.mod = summary(mod)
 print(sum.mod, unpen = T)
 plot(mod)
 
-# parallel
+# Example option 2: Using 2 cores for parallel computation, dividing the data into 10 chunks, using 2 iterations of one-step estimator for update
 modp = dcalasso(as.formula(paste0('Surv(t0,t1,status)~',paste(paste0('V',4:103),collapse='+'))),
                 family = 'cox.ph',data = dat.mat0,
                 K = 10, iter.os = 2, ncores = 2)
@@ -273,15 +281,15 @@ sum.modp = summary(modp)
 print(sum.modp, unpen = T)
 plot(modp)
 
-# Standard
+# Compare the divide and conquer method unpenalized model fit against a standard Cox fit using the whole dataset
 std = coxph(as.formula(paste0('Surv(t0,t1,status)~',paste(paste0('V',4:103),
                                                           collapse='+'))),
             data = dat.mat0)
 plot(mod$coefficients.unpen, std$coefficients)
 plot(modp$coefficients.unpen, mod$coefficients.unpen)
 
-# With strata
-# unicore
+## A time-dependent Cox model, with stratification of baseline hazard: Surv(t0,t1,status)~strata(strat)+V4+V5+...+V103
+# Example option 1: Using 1 core for computation, dividing the data into 10 chunks, using 4 iterations of one-step estimator for update
 mod = dcalasso(as.formula(paste0('Surv(t0,t1,status)~strata(strat)+',paste(paste0('V',4:103),collapse='+'))),
                family = 'cox.ph',data = dat.mat0,
                K = 10, iter.os = 4)
@@ -289,7 +297,7 @@ sum.mod = summary(mod)
 print(sum.mod, unpen = T)
 plot(mod)
 
-# parallel
+# Example option 2: Using 2 cores for parallel computation, dividing the data into 10 chunks, using 2 iterations of one-step estimator for update
 modp = dcalasso(as.formula(paste0('Surv(t0,t1,status)~strata(strat)+',paste(paste0('V',4:103),collapse='+'))),
                 family = 'cox.ph',data = dat.mat0,
                 K = 10, iter.os = 4, ncores = 2)
@@ -297,17 +305,18 @@ sum.modp = summary(modp)
 print(sum.modp, unpen = T)
 plot(modp)
 
-# Standard
+# Compare the divide and conquer method unpenalized model fit against a standard Cox fit using the whole dataset
 std = coxph(as.formula(paste0('Surv(t0,t1,status)~strata(strat)+',paste(paste0('V',4:103),
                                                                         collapse='+'))),
             data = dat.mat0)
 plot(mod$coefficients.unpen, std$coefficients)
 plot(modp$coefficients.unpen, mod$coefficients.unpen)
+```
 
+4. Time-dependent dataset, when the dataset are saved in multiple files: Fitting a Cox model for a dataset with 50 time-dependent variables, 50 additional time-independent variables, and 100,000 samples.
 
-
-
-########### Time-dependent separate file saving ####################
+```
+########### Generating a time-dependent dataset, saving the dataset to 10 separate files ####################
 set.seed(1)
 n.subject = 1e5; p.ti = 50; p.tv = 50; K = 20; n = n.subject/K; cor = 0.2;  lambda.grid = 10^seq(-10,3,0.01);
 beta0.ti = NULL
@@ -322,40 +331,40 @@ for (kk in 1: 10){
 }
 
 
-## Without strata
-# unicore
+## A time-dependent Cox model, without stratification of baseline hazard: Surv(t0,t1,status)~V4+V5+...+V103
+# Example option 1: Using 1 core for computation, loading dataset from 10 chunks [each time the RAM will only contain data from 1 file], using 2 iterations of one-step estimator for update
 mod = dcalasso(as.formula(paste0('Surv(t0,t1,status)~',paste(paste0('V',4:103),collapse='+'))),
                family = 'cox.ph',
-               data.rds = paste0(dir,'dataTV',1:10,'.rds'), K = 10, iter.os = 2)
+               data.rds = paste0(dir,'dataTV',1:10,'.rds'), iter.os = 2)
 sum.mod = summary(mod)
 print(sum.mod, unpen = T)
 plot(mod)
 
-# parallel
+# Example option 2: Using 2 cores for parallel computation, loading dataset from 10 chunks [each time the RAM will only contain data from 1 file], using 2 iterations of one-step estimator for update
 modp = dcalasso(as.formula(paste0('Surv(t0,t1,status)~',paste(paste0('V',4:103),collapse='+'))),
                 family = 'cox.ph',
-                data.rds = paste0(dir,'dataTV',1:10,'.rds'), K = 10, iter.os = 2, ncores = 2)
+                data.rds = paste0(dir,'dataTV',1:10,'.rds'), iter.os = 2, ncores = 2)
 sum.modp = summary(modp)
 print(sum.modp, unpen = T)
 plot(modp)
 
-# Standard
+# Compare the divide and conquer method unpenalized model fit against a standard Cox fit using the whole dataset
 std = coxph(as.formula(paste0('Surv(t0,t1,status)~',paste(paste0('V',4:103),
                                                           collapse='+'))),
             data = dat.mat0)
 plot(mod$coefficients.unpen, std$coefficients)
 plot(modp$coefficients.unpen, mod$coefficients.unpen)
 
-# With strata
-# unicore
+## A time-dependent Cox model, with stratification of baseline hazard: Surv(t0,t1,status)~strata(strat)+V4+V5+...+V103
+# Example option 1: Using 1 core for computation, loading dataset from 10 chunks [each time the RAM will only contain data from 1 file], using 4 iterations of one-step estimator for update
 mod = dcalasso(as.formula(paste0('Surv(t0,t1,status)~strata(strat)+',paste(paste0('V',4:103),collapse='+'))),
                family = 'cox.ph',
-               data.rds = paste0(dir,'dataTV',1:10,'.rds'), K = 10, iter.os = 4)
+               data.rds = paste0(dir,'dataTV',1:10,'.rds'), iter.os = 4)
 sum.mod = summary(mod)
 print(sum.mod, unpen = T)
 plot(mod)
 
-# parallel
+# Example option 2: Using 2 cores for parallel computation, loading dataset from 10 chunks [each time the RAM will only contain data from 1 file], using 4 iterations of one-step estimator for update
 modp = dcalasso(as.formula(paste0('Surv(t0,t1,status)~strata(strat)+',paste(paste0('V',4:103),collapse='+'))),
                 family = 'cox.ph',
                 data.rds = paste0(dir,'dataTV',1:10,'.rds'), K = 10, iter.os = 4, ncores = 2)
@@ -363,12 +372,11 @@ sum.modp = summary(modp)
 print(sum.modp, unpen = T)
 plot(modp)
 
-# Standard
+# Compare the divide and conquer method unpenalized model fit against a standard Cox fit using the whole dataset
 std = coxph(as.formula(paste0('Surv(t0,t1,status)~strata(strat)+',paste(paste0('V',4:103),
                                                                         collapse='+'))),
             data = dat.mat0)
 plot(mod$coefficients.unpen, std$coefficients)
 plot(modp$coefficients.unpen, mod$coefficients.unpen)
 ```
-
 
